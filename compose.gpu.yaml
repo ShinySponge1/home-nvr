@@ -1,0 +1,26 @@
+# Optional desktop NVIDIA override. Keep compose.yaml usable on CPU-only hosts.
+# First generate with --hardware nvidia and provide the public pretrained ONNX
+# export described in docs/MODELS.md. Never use this file alone.
+services:
+  frigate:
+    image: ${FRIGATE_GPU_IMAGE:-ghcr.io/blakeblackshear/frigate:0.18.1-tensorrt}
+    environment:
+      NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./data/models:/models:ro
+  ollama:
+    # The ai profile inherited from compose.yaml remains opt-in.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Camera Context</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to camera evidence</a>
+  <div class="shell">
+    <aside class="sidebar" aria-label="Camera navigation">
+      <a class="brand" href="/" aria-label="Camera Context home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>Camera<span class="brand-subtitle">Context</span></span>
+      </a>
+      <div class="sidebar-label">Workspace <span class="local-tag">LOCAL</span></div>
+      <div class="sidebar-section-title"><h2>Cameras</h2><span id="camera-count" class="count">0</span></div>
+      <nav id="camera-list" class="camera-list" aria-label="Available cameras">
+        <p class="sidebar-empty">Connect to load your camera catalog.</p>
+      </nav>
+      <div class="sidebar-foot">
+        <span class="small-dot" aria-hidden="true"></span>
+        <div><strong>Read-only workspace</strong><p>Inspect telemetry and event evidence.</p></div>
+      </div>
+    </aside>
+
+    <main id="main" class="main" tabindex="-1">
+      <header class="topbar">
+        <div class="breadcrumb">Workspace <span aria-hidden="true">/</span> <strong>Camera evidence</strong></div>
+        <div class="connection-summary">
+          <span id="connection-state" class="connection-state"><span class="status-dot" aria-hidden="true"></span>Disconnected</span>
+          <button id="disconnect" class="button button-quiet button-small" type="button" hidden>Disconnect</button>
+        </div>
+      </header>
+
+      <section class="page-heading" aria-labelledby="page-title">
+        <div><p class="eyebrow">OBSERVE · RETRIEVE · VERIFY</p><h1 id="page-title">Camera evidence</h1><p class="page-description">A scoped view of your cameras, their records, and the details they can support.</p></div>
+        <span class="mode-badge"><span aria-hidden="true"></span>Deterministic mode</span>
+      </section>
+
+      <section id="connection-card" class="connection-card" aria-labelledby="connect-title">
+        <div><p class="eyebrow">PRIVATE CONNECTION</p><h2 id="connect-title">Connect your local workspace</h2><p>Use your context-service access key. It stays in this tab's memory and is cleared when you disconnect.</p></div>
+        <form id="connect-form" class="connection-form" autocomplete="off">
+          <label for="access-key">Access key</label>
+          <div class="input-action"><input id="access-key" type="password" autocomplete="off" spellcheck="false" required aria-describedby="key-note" placeholder="Paste your access key"><button id="connect" class="button button-primary" type="submit">Connect <span aria-hidden="true">→</span></button></div>
+          <p id="key-note" class="field-note">The key is sent only in the authorization header. It is never saved to browser storage.</p>
+        </form>
+      </section>
+
+      <div id="alert" class="alert" role="alert" hidden></div>
+
+      <section class="scope-bar" aria-label="Selected camera">
+        <div class="camera-selection"><label for="camera">Selected camera</label><select id="camera" disabled><option value="">Connect to choose a camera</option></select></div>
+        <div class="camera-aliases"><span class="scope-label">ALSO KNOWN AS</span><p id="aliases">—</p></div>
+        <button id="refresh-live" class="button button-secondary button-small" type="button" disabled><span aria-hidden="true">↻</span> Refresh status</button>
+      </section>
+
+      <section class="metrics" aria-label="Selected camera telemetry">
+        <article class="metric-card"><div class="metric-top"><h2>Camera processing</h2><span class="metric-symbol" aria-hidden="true">▥</span></div><p class="metric-value"><span id="camera-fps">—</span><span class="metric-unit">FPS</span></p><p id="fps-detail" class="metric-detail">Waiting for camera telemetry</p></article>
+        <article class="metric-card"><div class="metric-top"><h2>Telemetry freshness</h2><span class="metric-symbol" aria-hidden="true">◷</span></div><p id="freshness" class="metric-value metric-value-text">Unknown</p><p id="freshness-detail" class="metric-detail">No freshness claim is available</p></article>
+        <article class="metric-card"><div class="metric-top"><h2>Plate recognition</h2><span class="metric-symbol" aria-hidden="true">▤</span></div><p id="lpr-status" class="metric-value metric-value-text">—</p><p class="metric-detail">Enabled capability does not guarantee a reading</p></article>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="panel snapshot-panel" aria-labelledby="snapshot-title">
+          <div class="panel-heading"><div><p class="eyebrow">VISUAL CONTEXT</p><h2 id="snapshot-title">Camera snapshot</h2></div><span class="subtle-badge">On request</span></div>
+          <div class="snapshot-stage">
+            <div id="snapshot-placeholder" class="snapshot-placeholder"><div class="frame-symbol" aria-hidden="true"><span></span></div><h3>A frame for visual review</h3><p>Load a snapshot from the selected camera.</p></div>
+            <img id="snapshot" alt="Selected camera snapshot; capture time is unverified" hidden>
+          </div>
+          <div class="snapshot-footer"><p id="snapshot-caption">Snapshot capture time has not been verified.</p><button id="load-snapshot" class="button button-secondary button-small" type="button" disabled>Load snapshot <span aria-hidden="true">↗</span></button></div>
+        </section>
+
+        <section class="panel query-panel" aria-labelledby="query-title">
+          <div class="panel-heading"><div><p class="eyebrow">ASK WITH CONTEXT</p><h2 id="query-title">What would you like to check?</h2></div></div>
+          <form id="query-form">
+            <fieldset id="query-controls" disabled>
+              <legend class="sr-only">Question and explicit time window</legend>
+              <div class="preset-list" aria-label="Suggested questions">
+                <button type="button" class="preset" data-preset="live">Live status</button><button type="button" class="preset" data-preset="plate">Plate readings</button><button type="button" class="preset" data-preset="color">Vehicle details</button><button type="button" class="preset" data-preset="recap">Activity recap</button>
+              </div>
+              <label class="input-label" for="question">Your question</label>
+              <textarea id="question" rows="3" maxlength="2000" required placeholder="What evidence is available for this camera?"></textarea>
+              <div class="window-heading"><span class="input-label">Recap time window</span><button id="last-30" type="button" class="text-button">Last 30 minutes</button></div>
+              <div class="time-window"><div><label for="window-start">From</label><input id="window-start" type="datetime-local" required></div><div><label for="window-end">To</label><input id="window-end" type="datetime-local" required></div></div>
+              <p id="timezone-note" class="field-note">Times use your browser timezone. The recap window is limited to 48 hours.</p>
+              <div class="query-footer"><p>Answers use structured evidence. Color, identity, and intent may remain unsupported.</p><button id="ask" class="button button-primary" type="submit">Retrieve evidence <span aria-hidden="true">→</span></button></div>
+            </fieldset>
+          </form>
+        </section>
+      </div>
+
+      <section id="answer-panel" class="panel answer-panel" aria-labelledby="answer-title">
+        <div class="panel-heading"><div><p class="eyebrow">RESPONSE & SOURCES</p><h2 id="answer-title">Evidence workspace</h2></div><span id="response-mode" class="subtle-badge">Ready when you are</span></div>
+        <div id="answer-empty" class="answer-empty"><span class="answer-empty-mark" aria-hidden="true">⌕</span><h3>A question starts with its sources</h3><p>Choose a camera and retrieve evidence to see a scoped answer, event references, and coverage limitations.</p></div>
+        <div id="answer-content" hidden>
+          <p id="asked-question" class="asked-question"></p><p id="answer" class="answer-text"></p>
+          <div id="response-scope" class="response-scope"></div>
+          <div id="coverage" class="coverage" hidden></div>
+          <div id="limitations" class="limitations"></div>
+          <div class="evidence-heading"><h3>Source event records</h3><span id="event-count" class="count">0</span></div>
+          <p class="evidence-note">Detector records and OCR are evidence candidates. An open record does not establish that an object is currently present.</p>
+          <div id="events" class="events"></div><p id="request-reference" class="request-reference"></p>
+        </div>
+      </section>
+      <footer class="page-footer"><span>Local context · Read-only access</span><span>Verify the source before relying on uncertain details.</span></footer>
+    </main>
+  </div>
+</body>
+</html>

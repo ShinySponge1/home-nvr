@@ -1,0 +1,52 @@
+# Reference only. Generate config/frigate.yml from your camera inventory.
+# CPU detection is a portable pilot default, not four-camera production sizing.
+version: 0.18-0
+mqtt:
+  enabled: false
+go2rtc:
+  streams:
+    entrance:
+      - rtsp://{FRIGATE_ENTRANCE_USER}:{FRIGATE_ENTRANCE_PASSWORD}@camera.example.invalid:554/main
+    entrance_sub:
+      - rtsp://{FRIGATE_ENTRANCE_USER}:{FRIGATE_ENTRANCE_PASSWORD}@camera.example.invalid:554/sub
+record:
+  enabled: true
+  expire_interval: 5
+  continuous:
+    days: 2
+  motion:
+    days: 0
+  alerts:
+    retain:
+      days: 2
+      mode: motion
+  detections:
+    retain:
+      days: 2
+      mode: motion
+snapshots:
+  enabled: true
+  retain:
+    default: 2
+logger:
+  default: info
+cameras:
+  entrance:
+    ffmpeg:
+      output_args:
+        record: preset-record-generic
+      inputs:
+        - path: rtsp://127.0.0.1:8554/entrance
+          input_args: preset-rtsp-restream
+          roles: [record]
+        - path: rtsp://127.0.0.1:8554/entrance_sub
+          input_args: preset-rtsp-restream
+          roles: [detect]
+    detect:
+      width: 640
+      height: 360
+      fps: 5
+    live:
+      streams:
+        Main: entrance
+        Sub: entrance_sub

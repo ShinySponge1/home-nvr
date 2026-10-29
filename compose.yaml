@@ -1,0 +1,110 @@
+# Pilot default: portable CPU detector. Multi-camera workloads need a verified
+# detector/decoder configuration matched to the deployment's actual hardware.
+name: ${COMPOSE_PROJECT_NAME:-home-nvr}
+
+x-logging: &logging
+  driver: local
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  context:
+    build: ./services/context
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging: *logging
+    environment:
+      FRIGATE_URL: http://frigate:5000
+      CAMERA_ALIASES_FILE: /app/config/camera-aliases.json
+      CONTEXT_API_KEY_FILE: /run/secrets/context_api_key
+    secrets: [context_api_key]
+    volumes:
+      - ./config/camera-aliases.json:/app/config/camera-aliases.json:ro
+    ports:
+      - "127.0.0.1:${CONTEXT_HTTP_PORT:-8090}:8090"
+
+  chat-gateway:
+    profiles: [ai]
+    build: ./services/gateway
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging: *logging
+    env_file:
+      - path: ./config/ai.env
+        format: raw
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      CAMERA_ALIASES_FILE: /app/config/camera-aliases.json
+      GATEWAY_CONTEXT_TOKENS: "8192"
+      GATEWAY_OUTPUT_TOKENS: "1024"
+    volumes:
+      - ./config/camera-aliases.json:/app/config/camera-aliases.json:ro
+    expose: ["8081"]
+
+  ollama:
+    profiles: [ai]
+    image: ${OLLAMA_IMAGE:-ollama/ollama@sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241}
+    restart: unless-stopped
+    logging: *logging
+    environment:
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_MAX_QUEUE: "2"
+      OLLAMA_CONTEXT_LENGTH: "8192"
+    volumes:
+      - ollama_data:/root/.ollama
+    expose: ["11434"]
+
+  frigate:
+    image: ${FRIGATE_IMAGE:-ghcr.io/blakeblackshear/frigate:0.18.1}
+    restart: unless-stopped
+    stop_grace_period: 60s
+    shm_size: ${FRIGATE_SHM_SIZE:-512mb}
+    logging: *logging
+    volumes:
+      # Keep SQLite on Docker-managed Linux storage, including on Windows/WSL.
+      - frigate_config:/config
+      - ./config/frigate.yml:/config/config.yml:ro
+      - ${FRIGATE_MEDIA_PATH:-./data/media}:/media/frigate
+    tmpfs:
+      - /tmp/cache:size=1g
+    # Raw env preserves literal dollar signs and quotes in camera credentials.
+    # Requires Docker Compose 2.30+. bootstrap creates this private file.
+    env_file:
+      - path: ./secrets/camera-secrets.env
+        format: raw
+    ports:
+      - "127.0.0.1:${FRIGATE_HTTP_PORT:-18971}:8971"
+
+  # Enable only with inventory mqtt.enabled: true AND --profile mqtt.
+  mosquitto:
+    image: eclipse-mosquitto:2.0.22@sha256:09b62ff32c2e7b64d4b431b9a89236073289b68db273de2b089edeb9b0d92b5c
+    profiles: [mqtt]
+    user: "1883:1883"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    logging: *logging
+    volumes:
+      - ./mqtt/config:/mosquitto/config:ro
+      - mqtt_data:/mosquitto/data
+    tmpfs:
+      - /tmp:size=16m
+    # No host listener; clients on this Compose network authenticate.
+    expose: ["1883"]
+
+volumes:
+  frigate_config:
+  mqtt_data:
+  ollama_data:
+
+secrets:
+  context_api_key:
+    file: ./secrets/context_api_key

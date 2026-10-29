@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible application problem without private camera data.
+body:
+  - type: markdown
+    attributes:
+      value: Do not upload camera footage, faces, plates, RTSP URLs, credentials, generated configuration, databases, or diagnostic archives.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include expected behavior and steps to reproduce using redacted or synthetic examples.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Versions and hardware
+      description: Application commit, Docker/Compose, OS, CPU/GPU, and selected profile. No network addresses or credentials.
+    validations:
+      required: true
+  - type: textarea
+    id: errors
+    attributes:
+      label: Redacted error categories
+      description: Include short error messages only after checking them for passwords and private data.

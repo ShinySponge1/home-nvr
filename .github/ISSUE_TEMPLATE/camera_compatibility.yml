@@ -1,0 +1,26 @@
+name: Camera compatibility
+description: Share a camera stream compatibility result without footage or connection details.
+body:
+  - type: markdown
+    attributes:
+      value: Compatibility depends on tested streams and codecs. Never include footage, camera URLs, IP addresses, serial numbers, or credentials.
+  - type: input
+    id: model
+    attributes:
+      label: Manufacturer, model, and firmware version
+    validations:
+      required: true
+  - type: textarea
+    id: stream
+    attributes:
+      label: Stream characteristics
+      description: RTSP or RTSPS, H.264 or H.265, main/sub resolutions and FPS, audio codec if used. No connection URLs.
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Observed results
+      description: Recording, browser playback, audio, detection, reconnect behavior, host hardware, and app version. Mark untested features explicitly.
+    validations:
+      required: true
