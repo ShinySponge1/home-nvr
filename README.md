@@ -38,6 +38,11 @@ docker compose config --quiet
 docker compose up -d --build
 ```
 
+The first build compiles patched go2rtc and Ollama executables from pinned,
+checksummed upstream source; no private binary is downloaded or committed. See
+[runtime security overlays](docs/SECURITY-BUILDS.md) for provenance and advisory
+mapping.
+
 Open the evidence viewer at `http://localhost:8090` and Frigate at
 `https://localhost:18971`. Frigate bootstraps its own login; its development
 certificate may require local browser trust configuration. Read the generated
@@ -84,7 +89,7 @@ captions remain unverified. Color, vehicle year, and identity are not invented.
 
 Enable `ai.enabled: true` and choose the official Qwen tag in your private camera
 inventory, then regenerate configuration with `--replace`. Start Ollama with
-`docker compose --profile ai up -d ollama`, inspect the download plan using
+`docker compose --profile ai up -d --build ollama`, inspect the download plan using
 `.venv/bin/python scripts/setup_models.py`, and add `--pull` to download the model
 explicitly. Then run `docker compose --profile ai up -d --build`. Bootstrap keeps
 the generated Frigate providers and gateway model allowlist aligned.
@@ -117,6 +122,9 @@ identity systems, tenant isolation, and recording failover are not first-release
 requirements. Keep remote access private and deliberate; this starter does not
 make an internet-facing home service safe automatically.
 
+For remote phone access, keep the loopback bindings and follow the
+[tailnet-only Tailscale Serve design](docs/TAILSCALE.md). Do not use Funnel.
+
 The default installation uses upstream pretrained models. Personal footage,
 annotation history, custom checkpoints, credentials, and runtime databases are
 neither required nor included. Custom model training is future optional work;
@@ -133,4 +141,5 @@ Run checks with Python 3.11+:
 ```
 
 Keep runtime data separate from source control. See [SECURITY.md](SECURITY.md),
-[CONTRIBUTING.md](CONTRIBUTING.md), and [dependency notices](THIRD_PARTY.md).
+[CONTRIBUTING.md](CONTRIBUTING.md), [security build provenance](docs/SECURITY-BUILDS.md),
+and [dependency notices](THIRD_PARTY.md).

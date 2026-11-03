@@ -14,6 +14,12 @@ are part of that trusted boundary, not an isolation guarantee against a compromi
 companion. Introduce a dedicated authenticated read-only upstream facade before
 hosting untrusted tenants or plugins.
 
+Default Frigate and Ollama images are local overlays built from checksummed,
+pinned source to carry reviewed fixes not yet present in the pinned upstream
+runtime images. Review `docs/SECURITY-BUILDS.md`, rebuild without cache for release
+verification, and scan the final images. Never replace the pinned source or image
+digests with mutable tags without repeating that review.
+
 The viewer does not persist its bearer key in browser storage or URLs. Static
 assets contain no camera data. API replies and snapshots have `Cache-Control:
 no-store`. Values from upstream are displayed as text. CSP excludes third-party
@@ -37,6 +43,10 @@ training images, weights, or derived metadata. Set explicit policies for each.
 Do not publish footage, faces, plates, JWT keys, or local event-review history.
 The public-tree checker is a bounded packaging check, not a complete secrets or
 privacy audit; release review must inspect the exact Git diff and history.
+
+For remote access, retain loopback-only Compose bindings and use a tailnet-only
+Tailscale Serve listener with a least-privilege grant to TCP 443. Do not use
+Tailscale Funnel. See `docs/TAILSCALE.md`.
 
 For a private vulnerability report, contact the repository maintainer through a
 private channel. The future public repository must configure its own maintainer

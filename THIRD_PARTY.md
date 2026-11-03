@@ -4,13 +4,15 @@ Original companion code and templates in this directory use the included MIT
 license. This does not relicense upstream applications, Python packages, model
 weights, datasets, or trademarks. Images and weights are fetched separately.
 
-- [Frigate source/license](https://github.com/blakeblackshear/frigate/blob/v0.18.1/LICENSE):
+- [Frigate source/license](https://github.com/blakeblackshear/frigate/blob/v0.18.2/LICENSE):
   MIT code; Frigate branding is separately governed. This is an independent
   integration, not an official Frigate edition.
-- [go2rtc](https://github.com/AlexxIT/go2rtc): bundled by Frigate; retain applicable
-  upstream notices if redistributing.
-- [Ollama](https://github.com/ollama/ollama): retain its distribution notices;
-  each served model has its own terms.
+- [go2rtc](https://github.com/AlexxIT/go2rtc): bundled by Frigate and rebuilt from
+  pinned source with the patch in `services/frigate`; retain applicable upstream
+  notices if redistributing.
+- [Ollama](https://github.com/ollama/ollama): rebuilt from pinned source with the
+  dependency patch in `services/ollama`; retain its distribution notices. Each
+  served model has its own terms.
 - [Eclipse Mosquitto](https://mosquitto.org/): consult the upstream licenses and
   image notices when redistributing it.
 - [Ultralytics licensing](https://www.ultralytics.com/license): no Ultralytics

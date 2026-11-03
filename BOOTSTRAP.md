@@ -48,6 +48,9 @@ The default hardware selection is `--hardware cpu` and needs no downloaded custo
 detector file. For optional Qwen or desktop NVIDIA, follow [MODELS.md](docs/MODELS.md).
 Enable AI in the inventory before starting its profile; `setup_models.py` prints a
 plan by default and downloads a public model only when called with `--pull`.
+Automatic descriptions default to people and dogs only, and model residency is
+bounded with a two-minute keep-alive. Change those values deliberately for the
+deployment rather than enabling descriptions for every tracked object.
 
 Keep the generated `secrets/` directory private. On POSIX its mode is 0700; the
 API key file is readable inside an explicitly authorized container mount, while
@@ -83,8 +86,12 @@ Run generator tests with `python3 -m unittest discover -s tests -p 'test_bootstr
 The tests validate output structure and safeguards; they do not claim camera
 connectivity, detector throughput, codec compatibility, or production sizing.
 
+The default Frigate and Ollama services are local security-overlay builds from
+pinned source. Review [SECURITY-BUILDS.md](docs/SECURITY-BUILDS.md) before
+changing upstream image or source pins.
+
 Primary references: [Frigate restreaming](https://docs.frigate.video/configuration/restream/),
 [recording retention](https://docs.frigate.video/configuration/record/),
 [Docker env files](https://docs.docker.com/reference/compose-file/services/#env_file),
 [Mosquitto authentication](https://mosquitto.org/documentation/authentication-methods/),
-[Mosquitto password format](https://github.com/eclipse-mosquitto/mosquitto/blob/v2.0.22/apps/mosquitto_passwd/mosquitto_passwd.c).
+[Mosquitto password format](https://github.com/eclipse-mosquitto/mosquitto/blob/v2.1.2/apps/mosquitto_passwd/mosquitto_passwd.c).

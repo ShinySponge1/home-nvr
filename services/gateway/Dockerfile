@@ -1,4 +1,5 @@
-FROM python:3.12-slim@sha256:aa943ce411423c7582288f18707ff66eddcbaeb510502d747a72aeb34f30d159
+FROM python:3.12-alpine3.23@sha256:a4ad86fc2eaa4f9a5c3153776c9fb56e502dbd8e23dfa855d164308f376a6dd2
+RUN python -m pip uninstall --yes pip
 WORKDIR /app
 COPY gateway.py /app/gateway.py
 USER 65532:65532

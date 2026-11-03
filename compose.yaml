@@ -15,6 +15,7 @@ services:
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
+    pids_limit: 128
     logging: *logging
     environment:
       FRIGATE_URL: http://frigate:5000
@@ -23,6 +24,8 @@ services:
     secrets: [context_api_key]
     volumes:
       - ./config/camera-aliases.json:/app/config/camera-aliases.json:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=32m
     ports:
       - "127.0.0.1:${CONTEXT_HTTP_PORT:-8090}:8090"
 
@@ -33,6 +36,7 @@ services:
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
+    pids_limit: 128
     logging: *logging
     env_file:
       - path: ./config/ai.env
@@ -44,25 +48,45 @@ services:
       GATEWAY_OUTPUT_TOKENS: "1024"
     volumes:
       - ./config/camera-aliases.json:/app/config/camera-aliases.json:ro
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=32m
     expose: ["8081"]
 
   ollama:
     profiles: [ai]
-    image: ${OLLAMA_IMAGE:-ollama/ollama@sha256:5d3a2f25f9825628daba94dc0b1d421c7d57d6c03ae5faa9ba050e058bab8241}
+    build:
+      context: ./services/ollama
+      args:
+        OLLAMA_BASE_IMAGE: ${OLLAMA_IMAGE:-ollama/ollama:0.40.13@sha256:b2f0122c476bc9fe7ce679d8bb4bd555351e25e2554eefb156f61cb0a89cf429}
+    image: ${OLLAMA_SECURITY_IMAGE:-home-nvr-ollama:0.40.13-security.1}
     restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    pids_limit: 512
     logging: *logging
     environment:
       OLLAMA_NUM_PARALLEL: "1"
       OLLAMA_MAX_LOADED_MODELS: "1"
       OLLAMA_MAX_QUEUE: "2"
       OLLAMA_CONTEXT_LENGTH: "8192"
+      OLLAMA_KEEP_ALIVE: "2m"
+      OLLAMA_NO_CLOUD: "true"
     volumes:
       - ollama_data:/root/.ollama
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
     expose: ["11434"]
 
   frigate:
-    image: ${FRIGATE_IMAGE:-ghcr.io/blakeblackshear/frigate:0.18.1}
+    build:
+      context: ./services/frigate
+      args:
+        FRIGATE_BASE_IMAGE: ${FRIGATE_IMAGE:-ghcr.io/blakeblackshear/frigate:0.18.2@sha256:fd60f99ffd4eb6c42360ed4e14953e270586f239309ab3983e55b2e97ffac09a}
+    image: ${FRIGATE_SECURITY_IMAGE:-home-nvr-frigate:0.18.2-security.1}
     restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    pids_limit: 2048
     stop_grace_period: 60s
     shm_size: ${FRIGATE_SHM_SIZE:-512mb}
     logging: *logging
@@ -83,13 +107,14 @@ services:
 
   # Enable only with inventory mqtt.enabled: true AND --profile mqtt.
   mosquitto:
-    image: eclipse-mosquitto:2.0.22@sha256:09b62ff32c2e7b64d4b431b9a89236073289b68db273de2b089edeb9b0d92b5c
+    image: eclipse-mosquitto:2.1.2-alpine@sha256:860aeb5d63ce509508f6dcfb2bc8a1c1dd2bc60555b562b45ce90e52d8dabb0f
     profiles: [mqtt]
     user: "1883:1883"
     restart: unless-stopped
     stop_grace_period: 30s
     read_only: true
     cap_drop: [ALL]
+    pids_limit: 64
     security_opt: [no-new-privileges:true]
     logging: *logging
     volumes:
