@@ -185,15 +185,15 @@ def render_config(inventory, hardware="cpu"):
     if inventory.get("ai_enabled", False):
         model = inventory["ai_model"]
         config["objects"]["genai"] = {
-            "enabled": True, "use_snapshot": True,
+            "enabled": True, "objects": ["person", "dog"], "use_snapshot": True,
             "prompt": "Describe the visible {label} in this image concisely. State uncertainty. Do not infer identity, intent, vehicle year, or unreadable text.",
             "send_triggers": {"tracked_object_end": True},
         }
         config["genai"] = {
             "local_descriptions": {"provider": "ollama", "base_url": "http://ollama:11434", "model": model,
-                                   "roles": ["descriptions"], "provider_options": {"keep_alive": "5m", "options": {"num_ctx": 8192, "num_predict": 512, "temperature": 0.2}}},
+                                   "roles": ["descriptions"], "provider_options": {"keep_alive": "2m", "options": {"num_ctx": 8192, "num_predict": 512, "temperature": 0.2}}},
             "local_chat": {"provider": "ollama", "base_url": "http://chat-gateway:8081", "model": model,
-                           "roles": ["chat"], "provider_options": {"keep_alive": "5m", "options": {"num_ctx": 8192, "num_predict": 1024, "temperature": 0.1}}},
+                           "roles": ["chat"], "provider_options": {"keep_alive": "2m", "options": {"num_ctx": 8192, "num_predict": 1024, "temperature": 0.1}}},
         }
     for camera in inventory["cameras"]:
         camera_id = camera["id"]

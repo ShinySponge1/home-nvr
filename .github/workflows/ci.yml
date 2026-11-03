@@ -1,16 +1,22 @@
 name: regression
 on: [push, pull_request]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     strategy:
       matrix:
         python-version: ['3.11', '3.12']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: python -m pip install -r requirements-bootstrap.txt
@@ -21,7 +27,12 @@ jobs:
       - run: python scripts/check_public_tree.py
   containers:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - run: docker build --tag home-nvr-context:ci services/context
       - run: docker build --tag home-nvr-gateway:ci services/gateway
+      - run: docker build --target go2rtc-build --tag home-nvr-go2rtc-build:ci services/frigate
+      - run: docker build --target ollama-build --tag home-nvr-ollama-build:ci services/ollama

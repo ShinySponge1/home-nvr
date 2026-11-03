@@ -89,6 +89,8 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn("OLLAMA_ALLOWED_MODELS=qwen3-vl:2b-instruct", ai_env)
         self.assertIn("OLLAMA_MODEL=qwen3-vl:2b-instruct", ai_env)
         self.assertTrue(config["objects"]["genai"]["use_snapshot"])
+        self.assertEqual(config["objects"]["genai"]["objects"], ["person", "dog"])
+        self.assertEqual({provider["provider_options"]["keep_alive"] for provider in config["genai"].values()}, {"2m"})
         self.assertTrue(report["ai_enabled"])
         self.assertEqual(report["ai_model"], "qwen3-vl:2b-instruct")
 

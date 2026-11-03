@@ -3,7 +3,10 @@
 # export described in docs/MODELS.md. Never use this file alone.
 services:
   frigate:
-    image: ${FRIGATE_GPU_IMAGE:-ghcr.io/blakeblackshear/frigate:0.18.1-tensorrt}
+    build:
+      args:
+        FRIGATE_BASE_IMAGE: ${FRIGATE_GPU_IMAGE:-ghcr.io/blakeblackshear/frigate:0.18.2-tensorrt@sha256:1cafb6ebbaff0aaf275cc3f31951bcf7e29f3989f18a10ba9565091367d8736c}
+    image: ${FRIGATE_GPU_SECURITY_IMAGE:-home-nvr-frigate:0.18.2-tensorrt-security.1}
     environment:
       NVIDIA_DRIVER_CAPABILITIES: compute,video,utility
     deploy:
